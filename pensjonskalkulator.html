@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pensjonskalkulator — Widerøe Flygere</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --cream:     #f5f0e8;
+    --cream2:    #ede8df;
+    --cream3:    #e4ddd0;
+    --ink:       #1a1a18;
+    --ink2:      #3a3a36;
+    --ink3:      #6b6860;
+    --ink4:      #9e9b94;
+    --rule:      #c8c2b6;
+    --rule-heavy:#1a1a18;
+    --accent:    #1a1a18;
+    --fo:        #2b5ea7;
+    --fc:        #8b2500;
+    --highlight: #f0ebe0;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--cream);
+    color: var(--ink);
+    font-family: 'IBM Plex Sans', sans-serif;
+    min-height: 100vh;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  /* ── MASTHEAD ── */
+  .masthead {
+    border-bottom: 3px solid var(--ink);
+    padding: 28px 48px 20px;
+  }
+
+  .masthead-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding-bottom: 12px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .publication {
+    font-family: 'Playfair Display', serif;
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--ink3);
+  }
+
+  .dateline {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--ink4);
+    letter-spacing: 0.08em;
+  }
+
+  .masthead-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 32px;
+  }
+
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(32px, 4.5vw, 56px);
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+  }
+
+  h1 em {
+    font-style: italic;
+    font-weight: 400;
+  }
+
+  .masthead-sub {
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--ink3);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    text-align: right;
+    line-height: 1.8;
+    flex-shrink: 0;
+  }
+
+  /* ── LAYOUT ── */
+  .page {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    min-height: calc(100vh - 120px);
+  }
+
+  /* Left column */
+  .sidebar {
+    border-right: 1px solid var(--rule);
+    padding: 32px 28px;
+    background: var(--cream);
+  }
+
+  /* Right column */
+  .main {
+    padding: 32px 40px;
+    background: var(--cream);
+  }
+
+  /* ── SECTION HEADERS ── */
+  .section-head {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--ink3);
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--rule);
+    margin-bottom: 16px;
+    margin-top: 28px;
+  }
+
+  .section-head:first-child { margin-top: 0; }
+
+  /* ── FORM ELEMENTS ── */
+  .field { margin-bottom: 14px; }
+
+  label {
+    display: block;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    font-weight: 400;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink3);
+    margin-bottom: 5px;
+  }
+
+  input[type="number"] {
+    width: 100%;
+    background: white;
+    border: none;
+    border-bottom: 1px solid var(--ink);
+    border-radius: 0;
+    color: var(--ink);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 16px;
+    font-weight: 400;
+    padding: 6px 0;
+    outline: none;
+    transition: border-color 0.15s;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  input[type="number"]:focus {
+    border-bottom: 2px solid var(--ink);
+    background: var(--highlight);
+    padding: 6px 6px;
+  }
+
+  /* Range slider */
+  .range-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 4px;
+  }
+
+  .range-display {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 18px;
+    font-weight: 300;
+    color: var(--ink);
+    letter-spacing: -0.02em;
+  }
+
+  input[type="range"] {
+    width: 100%;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 1px;
+    background: var(--ink);
+    outline: none;
+    margin: 8px 0 3px;
+    border-radius: 0;
+  }
+
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 12px;
+    height: 12px;
+    background: var(--ink);
+    cursor: pointer;
+    border-radius: 0;
+    border: none;
+  }
+
+  input[type="range"]::-webkit-slider-thumb:hover {
+    background: var(--ink2);
+    width: 14px;
+    height: 14px;
+  }
+
+  .range-limits {
+    display: flex;
+    justify-content: space-between;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    color: var(--ink4);
+    letter-spacing: 0.08em;
+  }
+
+  /* ── CAREER PATH ── */
+  .career-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    border: 1px solid var(--ink);
+    margin-bottom: 14px;
+  }
+
+  .career-btn {
+    background: none;
+    border: none;
+    border-right: 1px solid var(--ink);
+    color: var(--ink4);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    padding: 10px 6px;
+    cursor: pointer;
+    text-transform: uppercase;
+    text-align: center;
+    transition: all 0.1s;
+    line-height: 1.6;
+  }
+
+  .career-btn:last-child { border-right: none; }
+
+  .career-btn:hover { background: var(--cream2); color: var(--ink); }
+
+  .career-btn.active-fo {
+    background: var(--fo);
+    color: white;
+    font-weight: 500;
+  }
+
+  .career-btn.active-fc {
+    background: var(--fc);
+    color: white;
+    font-weight: 500;
+  }
+
+  /* ── TRANSITION BOX ── */
+  .transition-box {
+    background: var(--cream2);
+    border-left: 3px solid var(--ink);
+    padding: 12px 14px;
+    margin-bottom: 14px;
+  }
+
+  .transition-box.hidden { display: none; }
+
+  .transition-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink3);
+    margin-bottom: 8px;
+  }
+
+  .transition-note {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--ink3);
+    margin-top: 8px;
+    line-height: 1.6;
+  }
+
+  .transition-note strong { color: var(--ink); font-weight: 500; }
+
+  /* ── RULE INFO ── */
+  .rule-info {
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    padding: 10px 0;
+    margin-top: 4px;
+  }
+
+  .rule-line {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--ink3);
+    line-height: 2;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .rule-line span { color: var(--ink); font-weight: 500; }
+
+  /* ── KPI STRIP ── */
+  .kpi-strip {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    border-top: 3px solid var(--ink);
+    border-bottom: 1px solid var(--rule);
+    margin-bottom: 32px;
+  }
+
+  .kpi {
+    padding: 20px 0 16px;
+    border-right: 1px solid var(--rule);
+  }
+
+  .kpi:last-child { border-right: none; }
+
+  .kpi-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink3);
+    margin-bottom: 8px;
+    padding: 0 20px;
+  }
+
+  .kpi-value {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(18px, 2vw, 26px);
+    font-weight: 600;
+    color: var(--ink);
+    line-height: 1;
+    padding: 0 20px;
+  }
+
+  .kpi-sub {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    color: var(--ink4);
+    margin-top: 5px;
+    padding: 0 20px;
+    letter-spacing: 0.06em;
+  }
+
+  /* ── CHART ── */
+  .chart-section {
+    margin-bottom: 40px;
+  }
+
+  .chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--rule);
+    margin-bottom: 20px;
+  }
+
+  .chart-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  .chart-legend {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    color: var(--ink3);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .legend-line {
+    width: 20px;
+    height: 2px;
+  }
+
+  .chart-wrap { height: 240px; position: relative; }
+
+  /* ── TABLE ── */
+  .table-section {}
+
+  .table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--ink);
+    margin-bottom: 0;
+  }
+
+  .table-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  .table-scroll {
+    max-height: 340px;
+    overflow-y: auto;
+  }
+
+  .table-scroll::-webkit-scrollbar { width: 3px; }
+  .table-scroll::-webkit-scrollbar-track { background: var(--cream2); }
+  .table-scroll::-webkit-scrollbar-thumb { background: var(--rule); }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  thead th {
+    padding: 10px 12px;
+    text-align: left;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    color: var(--ink3);
+    text-transform: uppercase;
+    background: var(--cream);
+    border-bottom: 1px solid var(--rule);
+    position: sticky;
+    top: 0;
+    z-index: 2;
+  }
+
+  tbody td {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--cream3);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--ink2);
+  }
+
+  tbody tr:last-child td { border-bottom: none; }
+
+  tbody tr:hover td { background: var(--highlight); }
+
+  tbody tr.row-fo td { color: var(--fo); }
+  tbody tr.row-fc td { color: var(--fc); }
+  tbody tr.row-now td { color: var(--ink4); font-style: italic; background: var(--cream2); }
+
+  .badge {
+    display: inline-block;
+    padding: 1px 6px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 8px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border: 1px solid;
+  }
+
+  .badge-fo  { border-color: var(--fo); color: var(--fo); }
+  .badge-fc  { border-color: var(--fc); color: var(--fc); }
+  .badge-now { border-color: var(--rule); color: var(--ink4); }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 3px solid var(--ink);
+    padding: 14px 48px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .footer-text {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    color: var(--ink4);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  /* ── DIVIDER ── */
+  .rule { height: 1px; background: var(--rule); margin: 20px 0; }
+
+  @media (max-width: 860px) {
+    .page { grid-template-columns: 1fr; }
+    .sidebar { border-right: none; border-bottom: 1px solid var(--rule); }
+    .kpi-strip { grid-template-columns: 1fr 1fr; }
+    .masthead { padding: 20px 24px 16px; }
+    .main { padding: 24px; }
+    .footer-text:last-child { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- MASTHEAD -->
+<div class="masthead">
+  <div class="masthead-top">
+    <span class="publication">Widerøe Flygere &mdash; Pensjonskalkulator</span>
+    <span class="dateline">Innskuddssatser fra 01.01.2017</span>
+  </div>
+  <div class="masthead-title">
+    <h1>Pensjons<em>oversikt</em></h1>
+    <div class="masthead-sub">
+      G vokser 4,1 % per år<br>
+      Maks innskudd ved 12G<br>
+      Tjenestepensjon
+    </div>
+  </div>
+</div>
+
+<div class="page">
+
+  <!-- ── SIDEBAR ── -->
+  <aside class="sidebar">
+
+    <div class="section-head">Karriere</div>
+
+    <div class="field">
+      <label>Alder ved oppstart</label>
+      <input type="number" id="startAge" value="25" min="18" max="65">
+    </div>
+
+    <div class="field">
+      <label>Pensjonsalder</label>
+      <input type="number" id="retireAge" value="65" min="55" max="75">
+    </div>
+
+    <div class="field">
+      <label>Karrierevei</label>
+      <div class="career-grid">
+        <button class="career-btn active-fo" id="btn-fo-only" onclick="setCareerPath('FO_ONLY')">FO<br>Hele</button>
+        <button class="career-btn" id="btn-fo-fc" onclick="setCareerPath('FO_FC')">FO→FC<br>Overgang</button>
+        <button class="career-btn" id="btn-fc-only" onclick="setCareerPath('FC_ONLY')">FC<br>Fra start</button>
+      </div>
+    </div>
+
+    <div class="transition-box hidden" id="transitionSection">
+      <div class="transition-label">FO → FC overgang</div>
+      <div class="field" style="margin-bottom:0">
+        <label>År som FO</label>
+        <input type="number" id="foYears" value="7" min="1" max="29">
+      </div>
+      <div class="transition-note">
+        Etter <strong id="foYearsDisplay">7</strong> år som FO
+        → FC trinn <strong id="fcStartStep">8</strong>
+      </div>
+    </div>
+
+    <div class="section-head">Økonomi</div>
+
+    <div class="field">
+      <label>Grunnbeløp G i dag (kr)</label>
+      <input type="number" id="gValue" value="130160" min="50000" max="200000" step="100">
+    </div>
+
+    <div class="field">
+      <div class="range-row">
+        <label style="margin:0">Fondsavkastning</label>
+        <span class="range-display" id="returnRateVal">6,0 %</span>
+      </div>
+      <input type="range" id="returnRate" min="0" max="12" step="0.5" value="6">
+      <div class="range-limits"><span>0 %</span><span>12 %</span></div>
+    </div>
+
+    <div class="field">
+      <div class="range-row">
+        <label style="margin:0">Lønnsvekst per år</label>
+        <span class="range-display" id="salaryGrowthVal">3,0 %</span>
+      </div>
+      <input type="range" id="salaryGrowth" min="0" max="8" step="0.5" value="3">
+      <div class="range-limits"><span>0 %</span><span>8 %</span></div>
+    </div>
+
+    <div class="field">
+      <div class="range-row">
+        <label style="margin:0">Inflasjon (diskontering)</label>
+        <span class="range-display" id="inflationVal">2,5 %</span>
+      </div>
+      <input type="range" id="inflation" min="0" max="6" step="0.5" value="2.5">
+      <div class="range-limits"><span>0 %</span><span>6 %</span></div>
+    </div>
+
+    <div class="section-head">Nåværende situasjon</div>
+
+    <div class="field">
+      <label>Eksisterende oppsparing (kr)</label>
+      <input type="number" id="currentSavings" value="0" min="0" step="10000">
+    </div>
+
+    <div class="field">
+      <label>Nåværende lønnstrinn</label>
+      <input type="number" id="currentStep" value="1" min="1" max="29">
+    </div>
+
+    <div class="rule-info">
+      <div class="rule-line">7 % av lønn <span>0 → 12G</span></div>
+      <div class="rule-line">+18,1 % tillegg <span>7,1G → 12G</span></div>
+      <div class="rule-line">G-vekst <span>4,1 % / år</span></div>
+    </div>
+
+  </aside>
+
+  <!-- ── MAIN ── -->
+  <main class="main">
+
+    <!-- KPI strip -->
+    <div class="kpi-strip">
+      <div class="kpi">
+        <div class="kpi-label">Total oppsparing</div>
+        <div class="kpi-value" id="totalSavings">—</div>
+        <div class="kpi-sub">Nominelt ved pensjon</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Nåverdi</div>
+        <div class="kpi-value" id="presentValue">—</div>
+        <div class="kpi-sub">Diskontert til i dag</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Dagens innskudd</div>
+        <div class="kpi-value" id="currentContrib">—</div>
+        <div class="kpi-sub">Per år, nåværende trinn</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Arbeidsår igjen</div>
+        <div class="kpi-value" id="workYears">—</div>
+        <div class="kpi-sub">År til pensjon</div>
+      </div>
+    </div>
+
+    <!-- Chart -->
+    <div class="chart-section">
+      <div class="chart-header">
+        <div class="chart-title">Pensjonsoppsparing over tid</div>
+        <div class="chart-legend">
+          <div class="legend-item">
+            <div class="legend-line" style="background:var(--ink)"></div>
+            Akkumulert
+          </div>
+          <div class="legend-item">
+            <div class="legend-line" style="background:var(--ink4);border-top:1px dashed var(--ink4);height:0"></div>
+            Årlig innskudd
+          </div>
+        </div>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="mainChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="table-section">
+      <div class="table-header">
+        <div class="table-title">Karriereplan — trinn for trinn</div>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>År</th>
+              <th>Alder</th>
+              <th>Trinn</th>
+              <th>Rolle</th>
+              <th>Årslønn</th>
+              <th>Pensjonsinnskudd</th>
+              <th>Akkumulert</th>
+            </tr>
+          </thead>
+          <tbody id="careerTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<footer>
+  <span class="footer-text">Widerøe Flygere &mdash; Pensjonskalkulator</span>
+  <span class="footer-text">Estimater &mdash; Ikke finansiell rådgivning</span>
+</footer>
+
+<script>
+const SALARY = {
+  FO: [565791,585063,604339,710669,740818,770968,802716,834161,897052,928497,959943,980688,1001845,1023427,1045445,1073511,1102284,1131773,1162002,1192984,1224740,1257293,1297330,1338567,1381044,1408841,1436639,1464436,1492233],
+  FC: [948258,967531,986807,1048100,1071789,1095478,1120766,1145750,1195719,1220704,1231220,1251966,1273122,1294704,1316723,1344789,1373562,1403050,1433280,1464261,1496017,1528571,1568608,1609845,1652322,1680119,1707916,1735714,1763511]
+};
+
+let careerPath = 'FO_ONLY';
+const G_INFLATION = 0.041;
+let chart = null;
+
+function setCareerPath(path) {
+  careerPath = path;
+  document.getElementById('btn-fo-only').className = 'career-btn' + (path === 'FO_ONLY' ? ' active-fo' : '');
+  document.getElementById('btn-fo-fc').className   = 'career-btn' + (path === 'FO_FC'   ? ' active-fo' : '');
+  document.getElementById('btn-fc-only').className = 'career-btn' + (path === 'FC_ONLY' ? ' active-fc' : '');
+  document.getElementById('transitionSection').className = 'transition-box' + (path === 'FO_FC' ? '' : ' hidden');
+  calculate();
+}
+
+function calcPensionContribution(salary, G) {
+  const cap12G = 12 * G;
+  const threshold7_1G = 7.1 * G;
+  const pensionableSalary = Math.min(salary, cap12G);
+  const base = pensionableSalary * 0.07;
+  let extra = 0;
+  if (pensionableSalary > threshold7_1G) extra = (pensionableSalary - threshold7_1G) * 0.181;
+  return base + extra;
+}
+
+function fmt(n) {
+  return new Intl.NumberFormat('nb-NO', { maximumFractionDigits: 0 }).format(Math.round(n)) + ' kr';
+}
+
+function calculate() {
+  const startAge       = parseInt(document.getElementById('startAge').value)        || 25;
+  const retireAge      = parseInt(document.getElementById('retireAge').value)        || 65;
+  const G              = parseFloat(document.getElementById('gValue').value)         || 130160;
+  const returnRate     = parseFloat(document.getElementById('returnRate').value)     / 100;
+  const inflationRate  = parseFloat(document.getElementById('inflation').value)      / 100;
+  const salaryGrowth   = parseFloat(document.getElementById('salaryGrowth').value)   / 100;
+  const foYears        = parseInt(document.getElementById('foYears').value)          || 7;
+  const currentSavings = parseFloat(document.getElementById('currentSavings').value) || 0;
+  const currentStep    = parseInt(document.getElementById('currentStep').value)      || 1;
+
+  const totalYears = Math.max(1, retireAge - startAge);
+
+  document.getElementById('foYearsDisplay').textContent = foYears;
+  document.getElementById('fcStartStep').textContent    = foYears + 1;
+
+  let accumulated = currentSavings;
+  const labels = [], accData = [], contribData = [], tableRows = [];
+  const stepOffset = Math.max(0, currentStep - 1);
+
+  for (let y = 0; y < totalYears; y++) {
+    const age     = startAge + currentStep - 1 + 1 + y;
+    const absStep = stepOffset + 1 + y;
+    let role;
+    if      (careerPath === 'FO_ONLY') role = 'FO';
+    else if (careerPath === 'FC_ONLY') role = 'FC';
+    else                               role = absStep < foYears ? 'FO' : 'FC';
+
+    const stepIndex    = Math.min(absStep, 28);
+    const salary       = SALARY[role][stepIndex] * Math.pow(1 + salaryGrowth, y + 1);
+    const adjustedG    = G * Math.pow(1 + G_INFLATION, y + 1);
+    const contribution = calcPensionContribution(salary, adjustedG);
+
+    accumulated = accumulated * (1 + returnRate) + contribution;
+    labels.push(age + ' år');
+    accData.push(Math.round(accumulated));
+    contribData.push(Math.round(contribution));
+    tableRows.push({ year: y+1, age, step: stepIndex+1, role, salary, contribution, accumulated });
+  }
+
+  const presentValue = accumulated / Math.pow(1 + inflationRate, totalYears);
+  const curStepIdx   = Math.min(currentStep - 1, 28);
+  const curRole      = careerPath === 'FC_ONLY' ? 'FC' : careerPath === 'FO_ONLY' ? 'FO' : (curStepIdx < foYears ? 'FO' : 'FC');
+  const curContrib   = calcPensionContribution(SALARY[curRole][curStepIdx], G);
+
+  document.getElementById('totalSavings').textContent   = fmt(accumulated);
+  document.getElementById('currentContrib').textContent = fmt(curContrib);
+  document.getElementById('presentValue').textContent   = fmt(presentValue);
+  document.getElementById('workYears').textContent      = totalYears;
+
+  updateChart(labels, accData, contribData);
+
+  const nowAge   = startAge + currentStep - 1;
+  const startRow = currentSavings > 0
+    ? `<tr class="row-now"><td>—</td><td>${nowAge}</td><td>${currentStep}</td><td><span class="badge badge-now">NÅ</span></td><td>—</td><td>—</td><td>${fmt(currentSavings)}</td></tr>`
+    : '';
+
+  document.getElementById('careerTableBody').innerHTML = startRow + tableRows.map(r => `
+    <tr class="row-${r.role.toLowerCase()}">
+      <td>${r.year}</td><td>${r.age}</td><td>${r.step}</td>
+      <td><span class="badge badge-${r.role.toLowerCase()}">${r.role}</span></td>
+      <td>${fmt(r.salary)}</td><td>${fmt(r.contribution)}</td><td>${fmt(r.accumulated)}</td>
+    </tr>`).join('');
+}
+
+function updateChart(labels, accData, contribData) {
+  const ctx = document.getElementById('mainChart').getContext('2d');
+  if (chart) chart.destroy();
+  chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Akkumulert pensjon',
+          data: accData,
+          borderColor: '#1a1a18',
+          backgroundColor: 'rgba(26,26,24,0.04)',
+          borderWidth: 2,
+          fill: true,
+          tension: 0.3,
+          pointRadius: 0,
+          pointHoverRadius: 4,
+          yAxisID: 'y'
+        },
+        {
+          label: 'Årlig innskudd',
+          data: contribData,
+          borderColor: '#9e9b94',
+          backgroundColor: 'transparent',
+          borderWidth: 1.5,
+          fill: false,
+          tension: 0.3,
+          pointRadius: 0,
+          pointHoverRadius: 4,
+          yAxisID: 'y1',
+          borderDash: [4, 4]
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#1a1a18',
+          borderColor: '#1a1a18',
+          borderWidth: 0,
+          titleColor: '#f5f0e8',
+          bodyColor: '#9e9b94',
+          titleFont: { family: 'IBM Plex Mono', size: 11 },
+          bodyFont:  { family: 'IBM Plex Mono', size: 10 },
+          padding: 12,
+          callbacks: {
+            label: c => `  ${c.dataset.label}: ${new Intl.NumberFormat('nb-NO').format(c.raw)} kr`
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: { color: '#9e9b94', font: { family: 'IBM Plex Mono', size: 9 }, maxTicksLimit: 10 },
+          grid:  { color: '#e4ddd0' }
+        },
+        y: {
+          position: 'left',
+          ticks: {
+            color: '#6b6860',
+            font: { family: 'IBM Plex Mono', size: 9 },
+            callback: v => new Intl.NumberFormat('nb-NO', { notation: 'compact' }).format(v) + ' kr'
+          },
+          grid: { color: '#e4ddd0' }
+        },
+        y1: {
+          position: 'right',
+          ticks: {
+            color: '#c8c2b6',
+            font: { family: 'IBM Plex Mono', size: 9 },
+            callback: v => new Intl.NumberFormat('nb-NO', { notation: 'compact' }).format(v) + ' kr'
+          },
+          grid: { display: false }
+        }
+      }
+    }
+  });
+}
+
+['startAge','retireAge','gValue','foYears','currentSavings','currentStep'].forEach(id => {
+  document.getElementById(id).addEventListener('input', calculate);
+});
+
+document.getElementById('returnRate').addEventListener('input', function() {
+  document.getElementById('returnRateVal').textContent = parseFloat(this.value).toFixed(1).replace('.',',') + ' %';
+  calculate();
+});
+document.getElementById('inflation').addEventListener('input', function() {
+  document.getElementById('inflationVal').textContent = parseFloat(this.value).toFixed(1).replace('.',',') + ' %';
+  calculate();
+});
+document.getElementById('salaryGrowth').addEventListener('input', function() {
+  document.getElementById('salaryGrowthVal').textContent = parseFloat(this.value).toFixed(1).replace('.',',') + ' %';
+  calculate();
+});
+document.getElementById('foYears').addEventListener('input', function() {
+  document.getElementById('foYearsDisplay').textContent = this.value;
+  document.getElementById('fcStartStep').textContent = parseInt(this.value) + 1;
+});
+
+calculate();
+</script>
+</body>
+</html>
